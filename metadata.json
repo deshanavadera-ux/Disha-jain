@@ -1,0 +1,6 @@
+{
+  "name": "Vektor | Digital Marketing & AI Review",
+  "description": "Editorial insights, tactical frameworks, and strategic analysis at the intersection of digital marketing, generative AI, search evolution, and algorithmic growth.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
