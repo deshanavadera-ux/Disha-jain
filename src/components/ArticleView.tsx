@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Article, Comment } from '../types/blog';
 import { updateSEOMetadata } from '../utils/seo';
+import { OptimizedImage, AvatarImage } from './OptimizedImage';
 import {
   ArrowLeft,
   Bookmark,
@@ -256,13 +257,10 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           {/* Author Details and Top Action Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 pb-6 border-y border-neutral-200">
             <div className="flex items-center gap-3.5">
-              <img
+              <AvatarImage
                 src={article.author.avatar}
-                alt={article.author.name}
-                width={48}
-                height={48}
-                referrerPolicy="no-referrer"
-                className="w-12 h-12 rounded-full object-cover border border-neutral-200"
+                name={article.author.name}
+                size={48}
               />
               <div>
                 <p className="text-sm font-semibold text-neutral-900 leading-none">
@@ -331,22 +329,16 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
         {/* Featured Image with Caption (Above the fold hero image: eager loading, no delay) */}
         <figure className="my-8">
           <div className="relative rounded-xl overflow-hidden border border-neutral-200/90 aspect-[16/9] bg-neutral-100">
-            {!imageError ? (
-              <img
-                src={article.image}
-                alt={article.imageAlt}
-                width={1200}
-                height={675}
-                loading="eager"
-                referrerPolicy="no-referrer"
-                onError={() => setImageError(true)}
-                className="w-full h-full object-cover object-center"
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-900 text-white p-8">
-                <p className="text-xl font-serif-editorial font-bold">{article.title}</p>
-              </div>
-            )}
+            <OptimizedImage
+              src={article.image}
+              alt={article.imageAlt}
+              width={1200}
+              height={675}
+              priority={true}
+              fallbackCategory={article.category}
+              fallbackTitle={article.title}
+              className="w-full h-full"
+            />
           </div>
           {article.imageCaption && (
             <figcaption className="text-xs text-neutral-500 font-serif-editorial italic mt-2.5 text-center">
@@ -549,14 +541,10 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
         {/* Author Bio Card */}
         <div className="my-12 p-6 sm:p-8 bg-white border border-neutral-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <img
+          <AvatarImage
             src={article.author.avatar}
-            alt={article.author.name}
-            width={64}
-            height={64}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            className="w-16 h-16 rounded-full object-cover border border-neutral-200 shrink-0"
+            name={article.author.name}
+            size={64}
           />
           <div className="space-y-2">
             <div className="flex items-baseline gap-2">
@@ -649,14 +637,10 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <img
-                      src={comment.avatar}
-                      alt={comment.author}
-                      width={32}
-                      height={32}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className="w-8 h-8 rounded-full object-cover border border-neutral-200"
+                    <AvatarImage
+                      src={comment.avatar || ''}
+                      name={comment.author}
+                      size={32}
                     />
                     <div>
                       <p className="text-xs font-bold text-neutral-900">{comment.author}</p>

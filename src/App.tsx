@@ -97,7 +97,7 @@ export default function App() {
         title: 'Blogs Vert | Digital Marketing and AI Growth Strategies',
         description: 'Discover expert digital marketing and AI analysis, generative search optimization frameworks, and predictive strategies to drive modern organic growth.',
         canonicalPath: '/',
-        image: '/src/assets/images/hero_ai_marketing_analytics_1791989280565.jpg',
+        image: '/images/hero_ai_marketing_analytics_1791989280565.jpg',
         type: 'website',
       });
     };
@@ -133,7 +133,7 @@ export default function App() {
       title: 'Blogs Vert | Digital Marketing and AI Growth Strategies',
       description: 'Discover expert digital marketing and AI analysis, generative search optimization frameworks, and predictive strategies to drive modern organic growth.',
       canonicalPath: '/',
-      image: '/src/assets/images/hero_ai_marketing_analytics_1791989280565.jpg',
+      image: '/images/hero_ai_marketing_analytics_1791989280565.jpg',
       type: 'website',
     });
   };

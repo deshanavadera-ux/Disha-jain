@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Article } from '../types/blog';
 import { ArrowRight, Bookmark, Clock } from 'lucide-react';
+import { OptimizedImage, AvatarImage } from './OptimizedImage';
 
 interface HeroFeaturedProps {
   article: Article;
@@ -15,8 +16,6 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
   isSaved,
   onToggleSave,
 }) => {
-  const [imageError, setImageError] = useState(false);
-
   return (
     <section className="relative border-b border-neutral-200/80 bg-neutral-50/50 pb-12 pt-8 sm:pt-12 sm:pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,25 +35,16 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
             onClick={() => onReadArticle(article.id)}
             className="lg:col-span-7 group cursor-pointer relative overflow-hidden rounded-xl bg-neutral-200 border border-neutral-200/80 shadow-sm aspect-[16/10] sm:aspect-[16/9] lg:aspect-auto min-h-[320px] lg:min-h-[440px]"
           >
-            {!imageError ? (
-              <img
-                src={article.image}
-                alt={article.imageAlt}
-                width={1200}
-                height={675}
-                loading="eager"
-                referrerPolicy="no-referrer"
-                onError={() => setImageError(true)}
-                className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500 ease-out"
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col justify-end p-8 bg-gradient-to-tr from-neutral-900 via-neutral-800 to-neutral-700 text-white">
-                <span className="text-xs uppercase tracking-widest text-neutral-300 font-mono mb-2">
-                  Featured Research Monograph
-                </span>
-                <p className="text-2xl font-serif-editorial font-bold">{article.title}</p>
-              </div>
-            )}
+            <OptimizedImage
+              src={article.image}
+              alt={article.imageAlt}
+              width={1200}
+              height={675}
+              priority={true}
+              fallbackCategory={article.category}
+              fallbackTitle={article.title}
+              className="w-full h-full group-hover:scale-[1.02] transition-transform duration-500 ease-out"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/40 via-transparent to-transparent pointer-events-none" />
           </div>
 
@@ -97,14 +87,10 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
             <div className="pt-6 border-t border-neutral-200/90 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <img
+                  <AvatarImage
                     src={article.author.avatar}
-                    alt={article.author.name}
-                    width={40}
-                    height={40}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    className="w-10 h-10 rounded-full object-cover border border-neutral-200 bg-neutral-100"
+                    name={article.author.name}
+                    size={40}
                   />
                   <div>
                     <p className="text-xs font-semibold text-neutral-900 leading-none">

@@ -12,6 +12,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { ARTICLES } from '../data/articles';
+import { OptimizedImage } from './OptimizedImage';
 
 interface SEOAssignmentReportProps {
   onBackToHome: () => void;
@@ -461,13 +462,15 @@ export const SEOAssignmentReport: React.FC<SEOAssignmentReportProps> = ({
               <div key={art.id} className="p-5 bg-white border border-neutral-200 rounded-xl space-y-3 shadow-xs flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="relative aspect-[16/10] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100">
-                    <img
+                    <OptimizedImage
                       src={art.image}
                       alt={art.imageAlt}
                       width={640}
                       height={400}
                       loading="lazy"
-                      className="w-full h-full object-cover"
+                      fallbackCategory={art.category}
+                      fallbackTitle={art.title}
+                      className="w-full h-full"
                     />
                   </div>
                   <div>

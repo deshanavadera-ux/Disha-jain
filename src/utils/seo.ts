@@ -40,8 +40,8 @@ export function updateSEOMetadata(options: UpdateSEOMetadataOptions) {
 
   const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://blogs-vert.vercel.app';
   const fullCanonicalUrl = `${currentOrigin}${canonicalPath}`;
-  const defaultImage = `${currentOrigin}/src/assets/images/hero_ai_marketing_analytics_1791989280565.jpg`;
-  const fullImageUrl = image?.startsWith('http') ? image : `${currentOrigin}${image || defaultImage}`;
+  const defaultImage = `${currentOrigin}/images/hero_ai_marketing_analytics_1791989280565.jpg`;
+  const fullImageUrl = image?.startsWith('http') ? image : `${currentOrigin}${image?.replace('/src/assets/images/', '/images/') || defaultImage}`;
 
   // 2. Standard Meta Tags
   setMetaTag('name', 'description', description);

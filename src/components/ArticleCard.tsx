@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Article } from '../types/blog';
 import { Bookmark, Clock, ArrowRight } from 'lucide-react';
+import { OptimizedImage, AvatarImage } from './OptimizedImage';
 
 interface ArticleCardProps {
   article: Article;
@@ -15,8 +16,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
   isSaved,
   onToggleSave,
 }) => {
-  const [imageError, setImageError] = useState(false);
-
   return (
     <article className="group flex flex-col justify-between bg-white rounded-xl border border-neutral-200/90 overflow-hidden hover:border-neutral-400 transition-all duration-300 shadow-xs">
       <div>
@@ -25,27 +24,16 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
           onClick={() => onRead(article.id)}
           className="relative aspect-[16/10] overflow-hidden bg-neutral-100 cursor-pointer"
         >
-          {!imageError ? (
-            <img
-              src={article.image}
-              alt={article.imageAlt}
-              width={640}
-              height={400}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              onError={() => setImageError(true)}
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-neutral-900 text-neutral-300 text-center">
-              <span className="text-[10px] uppercase font-mono tracking-widest text-neutral-400 mb-2">
-                {article.category}
-              </span>
-              <p className="text-sm font-serif-editorial font-semibold text-white line-clamp-2">
-                {article.title}
-              </p>
-            </div>
-          )}
+          <OptimizedImage
+            src={article.image}
+            alt={article.imageAlt}
+            width={640}
+            height={400}
+            loading="lazy"
+            fallbackCategory={article.category}
+            fallbackTitle={article.title}
+            className="w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out"
+          />
 
           {/* Quick save button overlay */}
           <button
@@ -53,7 +41,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               e.stopPropagation();
               onToggleSave(article.id);
             }}
-            className={`absolute top-3 right-3 p-2 rounded-md backdrop-blur-md transition-colors cursor-pointer ${
+            className={`absolute top-3 right-3 p-2 rounded-md backdrop-blur-md transition-colors cursor-pointer z-20 ${
               isSaved
                 ? 'bg-neutral-900 text-white shadow-sm'
                 : 'bg-white/90 text-neutral-700 hover:text-neutral-950 hover:bg-white shadow-xs'
@@ -103,14 +91,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       {/* Card Footer: Author & Descriptive Read CTA */}
       <div className="px-5 sm:px-6 pb-5 pt-3 border-t border-neutral-100 flex items-center justify-between mt-2">
         <div className="flex items-center gap-2.5">
-          <img
+          <AvatarImage
             src={article.author.avatar}
-            alt={`Avatar of ${article.author.name}`}
-            width={28}
-            height={28}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            className="w-7 h-7 rounded-full object-cover border border-neutral-200"
+            name={article.author.name}
+            size={28}
           />
           <div className="truncate max-w-[130px] sm:max-w-[150px]">
             <p className="text-xs font-medium text-neutral-900 truncate">
