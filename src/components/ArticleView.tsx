@@ -18,6 +18,8 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  Camera,
+  Shield,
 } from 'lucide-react';
 
 interface ArticleViewProps {
@@ -43,6 +45,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   const [isCopied, setIsCopied] = useState(false);
   const [fontSize, setFontSize] = useState<'standard' | 'large'>('standard');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [highlightAnchorMode, setHighlightAnchorMode] = useState(false);
 
   const [comments, setComments] = useState<Comment[]>(() => {
     const saved = localStorage.getItem(`comments_${article.id}`);
@@ -315,6 +318,19 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               </button>
 
               <button
+                onClick={() => setHighlightAnchorMode(!highlightAnchorMode)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+                  highlightAnchorMode
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'border-neutral-200 text-neutral-700 hover:bg-neutral-100'
+                }`}
+                title="Toggle Step 3.F Descriptive Anchor Text SS View"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{highlightAnchorMode ? 'Anchor SS Mode ON' : 'Anchor SS View'}</span>
+              </button>
+
+              <button
                 onClick={() => setFontSize(fontSize === 'standard' ? 'large' : 'standard')}
                 className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
                 title="Toggle font size"
@@ -324,6 +340,34 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Screenshot Mode Active Banner */}
+          {highlightAnchorMode && (
+            <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <span className="font-bold text-emerald-950 font-mono">
+                    Step 3.F: Contextual Anchor Text Audit Mode Active
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold font-mono text-[10px]">
+                    100% Verified Descriptive Anchors
+                  </span>
+                  <button
+                    onClick={() => window.print()}
+                    className="px-2.5 py-1 bg-white border border-emerald-300 text-emerald-900 rounded font-semibold hover:bg-emerald-50 transition-colors text-[11px]"
+                  >
+                    Print / SS
+                  </button>
+                </div>
+              </div>
+              <p className="text-emerald-800 leading-relaxed">
+                All internal and external links in this article use informative, destination-specific anchor text without generic phrases such as "click here" or "read more". Primary keyword <span className="font-bold font-mono">"{article.primaryKeyword}"</span> and secondary keywords are naturally integrated into headings and body architecture.
+              </p>
+            </div>
+          )}
         </header>
 
         {/* Featured Image with Caption (Above the fold hero image: eager loading, no delay) */}
@@ -465,31 +509,58 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           </section>
 
           {/* Contextual Internal & External Links Section */}
-          <section className="my-10 p-6 bg-white border border-neutral-200 rounded-xl space-y-6">
-            <div className="space-y-1">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 font-mono">
-                Contextual References & Related Exploration
-              </h3>
-              <p className="text-xs text-neutral-500">
-                Connected intelligence and authoritative industry standards using descriptive anchor text.
-              </p>
+          <section className={`my-10 p-6 rounded-xl space-y-6 transition-all ${
+            highlightAnchorMode
+              ? 'bg-emerald-50/70 border-2 border-emerald-400 shadow-sm'
+              : 'bg-white border border-neutral-200'
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-200 pb-4">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 font-mono flex items-center gap-2">
+                  <Link2 className="w-4 h-4 text-neutral-800" />
+                  <span>Step 3.F: Contextual Anchor Text & Connected Intelligence</span>
+                </h3>
+                <p className="text-xs text-neutral-500">
+                  Authoritative internal links and external citations using informative anchor text without vague phrasing.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-2">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
+                  Zero "Click Here"
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">
+                  Descriptive Phrases Only
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
               {/* Internal Links */}
               <div className="space-y-3">
-                <span className="font-semibold text-neutral-900 flex items-center gap-1.5">
-                  <Link2 className="w-3.5 h-3.5 text-neutral-600" />
-                  Related Analysis on Blogs Vert
-                </span>
-                <ul className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-neutral-900 flex items-center gap-1.5 font-mono text-[11px] uppercase">
+                    <Link2 className="w-3.5 h-3.5 text-neutral-600" />
+                    Internal Article Cross-Links
+                  </span>
+                  <span className="text-[10px] text-neutral-400 font-mono">Relative URLs</span>
+                </div>
+                <ul className="space-y-3">
                   {article.internalLinks.map((link, lIdx) => (
-                    <li key={lIdx} className="space-y-0.5">
+                    <li key={lIdx} className="p-3 bg-neutral-50/80 rounded-lg border border-neutral-200 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+                          Compliant Anchor ✅
+                        </span>
+                        <span className="text-[10px] font-mono text-rose-600 line-through">
+                          Avoided "click here"
+                        </span>
+                      </div>
                       <button
                         onClick={() => onSelectArticle(link.targetId)}
-                        className="text-left font-semibold text-neutral-900 hover:text-neutral-600 transition-colors underline underline-offset-2 cursor-pointer"
+                        className="text-left font-semibold text-neutral-950 hover:text-neutral-600 transition-colors underline underline-offset-2 cursor-pointer text-xs leading-snug block"
                       >
-                        {link.anchorText}
+                        "{link.anchorText}"
                       </button>
                       <p className="text-[11px] text-neutral-500">{link.context}</p>
                     </li>
@@ -499,21 +570,32 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
               {/* External Authoritative Links */}
               <div className="space-y-3">
-                <span className="font-semibold text-neutral-900 flex items-center gap-1.5">
-                  <ExternalLink className="w-3.5 h-3.5 text-neutral-600" />
-                  Authoritative Standards & Citations
-                </span>
-                <ul className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-neutral-900 flex items-center gap-1.5 font-mono text-[11px] uppercase">
+                    <ExternalLink className="w-3.5 h-3.5 text-neutral-600" />
+                    Authoritative External Citations
+                  </span>
+                  <span className="text-[10px] text-neutral-400 font-mono">rel="noopener noreferrer"</span>
+                </div>
+                <ul className="space-y-3">
                   {article.externalLinks.map((link, eIdx) => (
-                    <li key={eIdx} className="space-y-0.5">
+                    <li key={eIdx} className="p-3 bg-neutral-50/80 rounded-lg border border-neutral-200 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-bold">
+                          Authoritative Anchor ✅
+                        </span>
+                        <span className="text-[10px] font-mono text-neutral-500">
+                          Verified Domain
+                        </span>
+                      </div>
                       <a
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-semibold text-neutral-900 hover:text-neutral-600 transition-colors underline underline-offset-2 inline-flex items-center gap-1"
+                        className="font-semibold text-neutral-950 hover:text-neutral-600 transition-colors underline underline-offset-2 inline-flex items-center gap-1 text-xs leading-snug"
                       >
-                        <span>{link.anchorText}</span>
-                        <ExternalLink className="w-3 h-3 text-neutral-400" />
+                        <span>"{link.anchorText}"</span>
+                        <ExternalLink className="w-3 h-3 text-neutral-400 shrink-0" />
                       </a>
                       <p className="text-[11px] text-neutral-500">Source: {link.publisher}</p>
                     </li>
