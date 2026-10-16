@@ -22,7 +22,7 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Subtle section kicker */}
         <div className="flex items-center justify-between mb-6 pb-3 border-b border-neutral-200">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-neutral-500">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-neutral-500 font-mono">
             <span>Featured Strategic Analysis</span>
             <span aria-hidden="true">·</span>
             <span className="text-neutral-900 font-bold">Vol. IV · Issue 10</span>
@@ -31,7 +31,7 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
-          {/* Main Visual Column */}
+          {/* Main Visual Column - Above the fold hero image: eager loading, no delay */}
           <div
             onClick={() => onReadArticle(article.id)}
             className="lg:col-span-7 group cursor-pointer relative overflow-hidden rounded-xl bg-neutral-200 border border-neutral-200/80 shadow-sm aspect-[16/10] sm:aspect-[16/9] lg:aspect-auto min-h-[320px] lg:min-h-[440px]"
@@ -39,7 +39,10 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
             {!imageError ? (
               <img
                 src={article.image}
-                alt={article.title}
+                alt={article.imageAlt}
+                width={1200}
+                height={675}
+                loading="eager"
                 referrerPolicy="no-referrer"
                 onError={() => setImageError(true)}
                 className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500 ease-out"
@@ -59,7 +62,7 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               {/* Unboxed metadata adhering strictly to zero-pill rule */}
-              <div className="flex items-center gap-2 text-xs text-neutral-600 font-medium">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-600 font-medium">
                 <span className="text-neutral-900 font-semibold">{article.category}</span>
                 <span aria-hidden="true" className="text-neutral-400">·</span>
                 <span>{article.publishedDate}</span>
@@ -83,6 +86,11 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
               <p className="text-sm sm:text-base text-neutral-600 leading-relaxed line-clamp-3 sm:line-clamp-4 font-normal">
                 {article.subtitle}
               </p>
+
+              <div className="text-[11px] text-neutral-500 font-mono">
+                <span>Primary Keyword: </span>
+                <span className="font-semibold text-neutral-800">{article.primaryKeyword}</span>
+              </div>
             </div>
 
             {/* Author byline and primary actions */}
@@ -92,6 +100,9 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
                   <img
                     src={article.author.avatar}
                     alt={article.author.name}
+                    width={40}
+                    height={40}
+                    loading="lazy"
                     referrerPolicy="no-referrer"
                     className="w-10 h-10 rounded-full object-cover border border-neutral-200 bg-neutral-100"
                   />
@@ -115,7 +126,7 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
                       ? 'bg-neutral-900 text-white border-neutral-900'
                       : 'border-neutral-200 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100'
                   }`}
-                  aria-label={isSaved ? 'Remove from saved' : 'Save article'}
+                  aria-label={isSaved ? `Remove ${article.title} from saved` : `Save ${article.title} for later`}
                   title={isSaved ? 'Saved to Reading List' : 'Save for later'}
                 >
                   <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
@@ -124,9 +135,10 @@ export const HeroFeatured: React.FC<HeroFeaturedProps> = ({
 
               <button
                 onClick={() => onReadArticle(article.id)}
+                aria-label={`Read full analysis on ${article.title}`}
                 className="w-full inline-flex items-center justify-between px-5 py-3 text-xs font-semibold uppercase tracking-wider text-white bg-neutral-950 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer group"
               >
-                <span>Read Full Analysis</span>
+                <span>Read Full Analysis on Generative Engine Optimization</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

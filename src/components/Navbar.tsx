@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Bookmark, Search, Menu, X, ArrowUpRight } from 'lucide-react';
+import { Bookmark, Search, Menu, X, ArrowUpRight, FileSpreadsheet, FileText } from 'lucide-react';
 
 interface NavbarProps {
   onNavigateHome: () => void;
   onNavigateSaved: () => void;
+  onNavigateKeywordResearch: () => void;
+  onNavigateSEOReport: () => void;
   onOpenSearch: () => void;
   onOpenCharter: () => void;
   onScrollToNewsletter: () => void;
@@ -15,6 +17,8 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   onNavigateHome,
   onNavigateSaved,
+  onNavigateKeywordResearch,
+  onNavigateSEOReport,
   onOpenSearch,
   onOpenCharter,
   onScrollToNewsletter,
@@ -30,49 +34,55 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#fbfbf9]/90 backdrop-blur-md border-b border-neutral-200/80 transition-colors">
+    <header className="sticky top-0 z-40 bg-[#fbfbf9]/95 backdrop-blur-md border-b border-neutral-200/80 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-8 h-18">
+        <div className="flex items-center justify-between gap-6 h-18">
           {/* Zone 1: Single text element wordmark */}
           <button
             onClick={onNavigateHome}
-            className="text-left group flex items-baseline gap-2 cursor-pointer focus:outline-none"
+            className="text-left group flex items-baseline gap-2 cursor-pointer focus:outline-none shrink-0"
           >
             <span className="text-2xl font-serif-editorial font-bold tracking-tight text-neutral-900 group-hover:text-neutral-700 transition-colors">
-              VEKTOR
+              BLOGS VERT
             </span>
-            <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium hidden sm:inline">
-              Review
+            <span className="text-xs uppercase tracking-widest text-neutral-500 font-medium hidden sm:inline font-mono">
+              Digital Marketing & AI
             </span>
           </button>
 
-          {/* Zone 2: 4–5 clean single-line text navigation links */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-neutral-600">
+          {/* Zone 2: Clean single-line text navigation links */}
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-neutral-600">
             <button
               onClick={onNavigateHome}
               className={`hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 currentView === 'home' ? 'text-neutral-950 font-semibold' : ''
               }`}
             >
-              All Articles
+              All Articles (10)
+            </button>
+            <button
+              onClick={onNavigateKeywordResearch}
+              className={`hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1 ${
+                currentView === 'keyword-research' ? 'text-neutral-950 font-semibold' : ''
+              }`}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-neutral-700" />
+              <span>SEO Keyword Research</span>
+            </button>
+            <button
+              onClick={onNavigateSEOReport}
+              className={`hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1 ${
+                currentView === 'seo-report' ? 'text-neutral-950 font-semibold' : ''
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-neutral-700" />
+              <span>SEO Assignment Report</span>
             </button>
             <button
               onClick={() => onSelectCategory('Search & SEO')}
               className="hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               Search & SEO
-            </button>
-            <button
-              onClick={() => onSelectCategory('Customer Experience')}
-              className="hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              Customer Experience
-            </button>
-            <button
-              onClick={() => onSelectCategory('Paid Media & Ads')}
-              className="hover:text-neutral-950 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              Paid Media
             </button>
             <button
               onClick={onOpenCharter}
@@ -88,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onOpenSearch}
               aria-label="Search articles"
               className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
-              title="Quick Search (Ctrl + K)"
+              title="Quick Search"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -122,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile menu toggle button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 rounded-lg cursor-pointer"
+              className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900 rounded-lg cursor-pointer"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -133,13 +143,27 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile navigation drop-down drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-neutral-200 bg-[#fbfbf9] px-4 pt-3 pb-6 space-y-3">
+        <div className="lg:hidden border-b border-neutral-200 bg-[#fbfbf9] px-4 pt-3 pb-6 space-y-3">
           <div className="flex flex-col space-y-2 text-base font-medium text-neutral-700">
             <button
               onClick={() => handleNavClick(onNavigateHome)}
               className="text-left px-3 py-2 rounded-md hover:bg-neutral-100 transition-colors"
             >
               All Articles (10)
+            </button>
+            <button
+              onClick={() => handleNavClick(onNavigateKeywordResearch)}
+              className="text-left px-3 py-2 rounded-md bg-neutral-100 font-semibold text-neutral-900 flex items-center gap-2"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>SEO Keyword Research (Step 2)</span>
+            </button>
+            <button
+              onClick={() => handleNavClick(onNavigateSEOReport)}
+              className="text-left px-3 py-2 rounded-md bg-neutral-100 font-semibold text-neutral-900 flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              <span>SEO Assignment Report (Step 5)</span>
             </button>
             <button
               onClick={() => handleNavClick(() => onSelectCategory('Search & SEO'))}
@@ -152,18 +176,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="text-left px-3 py-2 rounded-md hover:bg-neutral-100 transition-colors"
             >
               Customer Experience & Agents
-            </button>
-            <button
-              onClick={() => handleNavClick(() => onSelectCategory('Paid Media & Ads'))}
-              className="text-left px-3 py-2 rounded-md hover:bg-neutral-100 transition-colors"
-            >
-              Paid Media & Algorithmic Ads
-            </button>
-            <button
-              onClick={() => handleNavClick(() => onSelectCategory('Analytics & Data'))}
-              className="text-left px-3 py-2 rounded-md hover:bg-neutral-100 transition-colors"
-            >
-              Analytics, Churn & Attribution
             </button>
             <button
               onClick={() => handleNavClick(onNavigateSaved)}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Article, Comment } from '../types/blog';
+import { updateSEOMetadata } from '../utils/seo';
 import {
   ArrowLeft,
   Bookmark,
@@ -11,8 +12,11 @@ import {
   Type,
   ChevronRight,
   Send,
-  Linkedin,
-  Twitter,
+  HelpCircle,
+  Link2,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface ArticleViewProps {
@@ -37,6 +41,8 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   const [hasLiked, setHasLiked] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [fontSize, setFontSize] = useState<'standard' | 'large'>('standard');
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
   const [comments, setComments] = useState<Comment[]>(() => {
     const saved = localStorage.getItem(`comments_${article.id}`);
     if (saved) {
@@ -55,12 +61,27 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   const [commentSuccess, setCommentSuccess] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Scroll to top on article switch
+  // Sync SEO metadata dynamically when article changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setLikes(article.initialLikes);
     setHasLiked(false);
-  }, [article.id]);
+    setOpenFaqIndex(null);
+
+    updateSEOMetadata({
+      title: article.seoTitle,
+      description: article.seoDescription,
+      canonicalPath: article.canonicalPath,
+      image: article.image,
+      type: 'article',
+      article: article,
+      breadcrumbs: [
+        { name: 'Home', item: '/' },
+        { name: article.category, item: `/#category=${encodeURIComponent(article.category)}` },
+        { name: article.title, item: article.canonicalPath },
+      ],
+    });
+  }, [article.id, article]);
 
   // Track reading progress
   useEffect(() => {
@@ -87,7 +108,8 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    const url = `${window.location.origin}${article.canonicalPath}`;
+    navigator.clipboard.writeText(url);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2500);
   };
@@ -125,18 +147,19 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
     localStorage.setItem(`comments_${article.id}`, JSON.stringify(updated));
   };
 
-  // Find 3 related articles (prioritize same category or adjacent)
+  // Find 3 related articles
   const relatedArticles = allArticles
     .filter((a) => a.id !== article.id)
     .sort((a, b) => (a.category === article.category ? -1 : 1))
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-[#fbfbf9] pb-24">
+    <article className="min-h-screen bg-[#fbfbf9] pb-24">
       {/* Top reading progress indicator */}
       <div
         className="fixed top-0 left-0 h-1 bg-neutral-900 z-50 transition-all duration-150 ease-out"
         style={{ width: `${scrollProgress}%` }}
+        aria-hidden="true"
       />
 
       {/* Floating Action Utility Rail on Desktop */}
@@ -166,7 +189,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
         <button
           onClick={handleCopyLink}
-          aria-label="Copy link"
+          aria-label="Copy canonical link"
           className="p-3 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors cursor-pointer"
           title="Copy link to clipboard"
         >
@@ -185,7 +208,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between pb-6 border-b border-neutral-200">
+        <nav aria-label="Breadcrumb" className="flex items-center justify-between pb-6 border-b border-neutral-200">
           <button
             onClick={onBack}
             className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-600 hover:text-neutral-950 transition-colors cursor-pointer group"
@@ -201,12 +224,12 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               {article.title}
             </span>
           </div>
-        </div>
+        </nav>
 
         {/* Article Header */}
         <header className="pt-8 sm:pt-12 pb-8 space-y-6">
           {/* Zero-Pill Unboxed Metadata */}
-          <div className="flex items-center gap-2 text-xs text-neutral-500 font-medium">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 font-medium">
             <span className="text-neutral-900 font-semibold">{article.category}</span>
             <span aria-hidden="true">·</span>
             <span>{article.publishedDate}</span>
@@ -215,6 +238,8 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               <Clock className="w-3.5 h-3.5" />
               {article.readTime}
             </span>
+            <span aria-hidden="true">·</span>
+            <span className="text-neutral-600 font-mono text-[11px]">Primary: {article.primaryKeyword}</span>
           </div>
 
           <h1
@@ -234,6 +259,8 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               <img
                 src={article.author.avatar}
                 alt={article.author.name}
+                width={48}
+                height={48}
                 referrerPolicy="no-referrer"
                 className="w-12 h-12 rounded-full object-cover border border-neutral-200"
               />
@@ -301,13 +328,16 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           </div>
         </header>
 
-        {/* Featured Image with Caption */}
+        {/* Featured Image with Caption (Above the fold hero image: eager loading, no delay) */}
         <figure className="my-8">
           <div className="relative rounded-xl overflow-hidden border border-neutral-200/90 aspect-[16/9] bg-neutral-100">
             {!imageError ? (
               <img
                 src={article.image}
-                alt={article.title}
+                alt={article.imageAlt}
+                width={1200}
+                height={675}
+                loading="eager"
                 referrerPolicy="no-referrer"
                 onError={() => setImageError(true)}
                 className="w-full h-full object-cover object-center"
@@ -331,25 +361,40 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
             fontSize === 'large' ? 'text-lg sm:text-xl leading-[1.8]' : 'text-base sm:text-lg leading-[1.75]'
           }`}
         >
-          {/* Introduction with drop cap */}
+          {/* Introduction with drop cap and natural primary keyword inclusion */}
           <div className="first-letter:text-5xl first-letter:font-serif-editorial first-letter:font-bold first-letter:float-left first-letter:mr-3.5 first-letter:mt-1 first-letter:text-neutral-950 font-normal">
             <p>{article.introduction}</p>
           </div>
 
-          {/* Structured Sections */}
+          {/* Structured Sections with AEO Question-based H2s and direct answers */}
           {article.sections.map((section, idx) => (
             <section key={idx} className="space-y-6 pt-4">
-              <h2 className="text-2xl sm:text-3xl font-serif-editorial font-bold text-neutral-950 leading-tight tracking-tight">
-                {section.heading}
-              </h2>
+              <div className="space-y-2">
+                {section.isQuestionH2 && (
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 flex items-center gap-1.5">
+                    <HelpCircle className="w-3.5 h-3.5 text-neutral-600" />
+                    Answer Engine Optimization (AEO) Query
+                  </span>
+                )}
+                <h2 className="text-2xl sm:text-3xl font-serif-editorial font-bold text-neutral-950 leading-tight tracking-tight">
+                  {section.heading}
+                </h2>
+              </div>
 
               {section.paragraphs.map((p, pIdx) => (
-                <p key={pIdx} className="text-neutral-700">
+                <p
+                  key={pIdx}
+                  className={`text-neutral-700 ${
+                    section.isQuestionH2 && pIdx === 0
+                      ? 'p-4 bg-neutral-50 border border-neutral-200 rounded-lg font-medium text-neutral-900'
+                      : ''
+                  }`}
+                >
                   {p}
                 </p>
               ))}
 
-              {/* Key Takeaways Box (clean hairline border, NO thick left accent borders per Section 1.C) */}
+              {/* Key Takeaways Box */}
               {section.keyTakeaways && section.keyTakeaways.length > 0 && (
                 <div className="my-8 p-6 bg-white border border-neutral-200 rounded-xl space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 flex items-center gap-2">
@@ -382,6 +427,41 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
             </section>
           ))}
 
+          {/* Visible FAQ Section for AEO and User Trust */}
+          {article.faqs && article.faqs.length > 0 && (
+            <section className="my-12 p-6 sm:p-8 bg-white border border-neutral-200 rounded-xl space-y-6">
+              <div className="flex items-center gap-2 border-b border-neutral-200 pb-4">
+                <HelpCircle className="w-5 h-5 text-neutral-900" />
+                <h2 className="text-xl font-serif-editorial font-bold text-neutral-950">
+                  Frequently Asked Questions (AEO Q&A)
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                {article.faqs.map((faq, fIdx) => (
+                  <div key={fIdx} className="border border-neutral-200 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === fIdx ? null : fIdx)}
+                      className="w-full p-4 text-left flex items-center justify-between gap-4 bg-neutral-50 hover:bg-neutral-100 transition-colors cursor-pointer"
+                    >
+                      <span className="text-xs sm:text-sm font-bold text-neutral-900">{faq.question}</span>
+                      {openFaqIndex === fIdx ? (
+                        <ChevronUp className="w-4 h-4 text-neutral-500 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-neutral-500 shrink-0" />
+                      )}
+                    </button>
+                    {(openFaqIndex === fIdx || openFaqIndex === null) && (
+                      <div className="p-4 bg-white text-xs sm:text-sm text-neutral-700 border-t border-neutral-200 leading-relaxed">
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Strategic Conclusion */}
           <section className="pt-8 border-t border-neutral-200 space-y-4">
             <h2 className="text-2xl sm:text-3xl font-serif-editorial font-bold text-neutral-950">
@@ -390,6 +470,65 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
             <p className="text-neutral-700 italic">
               {article.conclusion}
             </p>
+          </section>
+
+          {/* Contextual Internal & External Links Section */}
+          <section className="my-10 p-6 bg-white border border-neutral-200 rounded-xl space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 font-mono">
+                Contextual References & Related Exploration
+              </h3>
+              <p className="text-xs text-neutral-500">
+                Connected intelligence and authoritative industry standards using descriptive anchor text.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+              {/* Internal Links */}
+              <div className="space-y-3">
+                <span className="font-semibold text-neutral-900 flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-neutral-600" />
+                  Related Analysis on Blogs Vert
+                </span>
+                <ul className="space-y-2.5">
+                  {article.internalLinks.map((link, lIdx) => (
+                    <li key={lIdx} className="space-y-0.5">
+                      <button
+                        onClick={() => onSelectArticle(link.targetId)}
+                        className="text-left font-semibold text-neutral-900 hover:text-neutral-600 transition-colors underline underline-offset-2 cursor-pointer"
+                      >
+                        {link.anchorText}
+                      </button>
+                      <p className="text-[11px] text-neutral-500">{link.context}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* External Authoritative Links */}
+              <div className="space-y-3">
+                <span className="font-semibold text-neutral-900 flex items-center gap-1.5">
+                  <ExternalLink className="w-3.5 h-3.5 text-neutral-600" />
+                  Authoritative Standards & Citations
+                </span>
+                <ul className="space-y-2.5">
+                  {article.externalLinks.map((link, eIdx) => (
+                    <li key={eIdx} className="space-y-0.5">
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-neutral-900 hover:text-neutral-600 transition-colors underline underline-offset-2 inline-flex items-center gap-1"
+                      >
+                        <span>{link.anchorText}</span>
+                        <ExternalLink className="w-3 h-3 text-neutral-400" />
+                      </a>
+                      <p className="text-[11px] text-neutral-500">Source: {link.publisher}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </section>
 
           {/* Unboxed Tags Metadata */}
@@ -413,6 +552,9 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           <img
             src={article.author.avatar}
             alt={article.author.name}
+            width={64}
+            height={64}
+            loading="lazy"
             referrerPolicy="no-referrer"
             className="w-16 h-16 rounded-full object-cover border border-neutral-200 shrink-0"
           />
@@ -484,7 +626,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
                 </span>
               ) : (
                 <span className="text-[11px] text-neutral-400">
-                  Moderated under Vektor editorial peer-review standards.
+                  Moderated under Blogs Vert editorial peer-review standards.
                 </span>
               )}
 
@@ -510,6 +652,9 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
                     <img
                       src={comment.avatar}
                       alt={comment.author}
+                      width={32}
+                      height={32}
+                      loading="lazy"
                       referrerPolicy="no-referrer"
                       className="w-8 h-8 rounded-full object-cover border border-neutral-200"
                     />
@@ -552,7 +697,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
               onClick={onBack}
               className="text-xs font-semibold uppercase tracking-wider text-neutral-600 hover:text-neutral-950 transition-colors cursor-pointer"
             >
-              View All (10) →
+              View All 10 Articles →
             </button>
           </div>
 
@@ -580,7 +725,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
                 <div className="pt-4 mt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-500">
                   <span className="font-medium text-neutral-800">{rel.author.name}</span>
                   <span className="font-semibold text-neutral-900 group-hover:translate-x-0.5 transition-transform">
-                    Read →
+                    Read Analysis →
                   </span>
                 </div>
               </div>
@@ -588,6 +733,6 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           </div>
         </section>
       </div>
-    </div>
+    </article>
   );
 };
