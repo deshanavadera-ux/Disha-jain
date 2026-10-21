@@ -29,3 +29,25 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
+
+/* Accessible Image Alt Text Hover Overlay & Tooltip */
+.image-hover-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-hover-container .image-alt-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.image-hover-container:hover .image-alt-overlay {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}

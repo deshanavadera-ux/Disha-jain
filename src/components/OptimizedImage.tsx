@@ -52,7 +52,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={`relative overflow-hidden image-hover-container group/img ${className}`}>
       {/* Loading Skeleton */}
       {!isLoaded && (
         <div
@@ -64,6 +64,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       <img
         src={resolvedSrc}
         alt={alt}
+        title={alt}
         width={width}
         height={height}
         loading={priority ? 'eager' : loading}
@@ -75,6 +76,24 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       />
+
+      {/* Styled Legible Alt Text Hover Overlay / Tooltip */}
+      {alt && isLoaded && (
+        <div
+          className="image-alt-overlay absolute inset-x-0 bottom-0 z-30 p-2.5 sm:p-3 bg-gradient-to-t from-black/85 via-black/60 to-transparent flex flex-col justify-end"
+          aria-hidden="true"
+        >
+          <div className="rounded-md bg-neutral-950/90 backdrop-blur-md border border-white/20 p-2 sm:p-2.5 shadow-xl max-w-full">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-neutral-300 mb-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span className="font-semibold text-white/90">Alt Text</span>
+            </div>
+            <p className="text-xs font-sans text-white font-medium leading-relaxed drop-shadow-sm select-none line-clamp-2 sm:line-clamp-3">
+              {alt}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
